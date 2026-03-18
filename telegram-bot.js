@@ -3,7 +3,7 @@ const { Telegraf, Markup } = require("telegraf");
 const axios = require("axios");
 
 const bot = new Telegraf(process.env.TOKEN);
-const API_URL = "https://flibusta-api.vercel.app";
+const API_URL = "http://localhost:4444";
 
 bot.start((ctx) => ctx.reply("Напиши назву книги для пошуку:"));
 

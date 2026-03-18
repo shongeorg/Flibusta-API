@@ -66,11 +66,17 @@ app.get("/api/download/:id", async (req, res) => {
     const safeTitle = title.replace(/[<>:"/\\|?*]/g, "_").slice(0, 100);
 
     const downloadUrl = flibusta.getUrl(bookId, format);
+    console.log(`Downloading: ${downloadUrl}`);
 
     const response = await axios({
       method: "get",
       url: downloadUrl,
       responseType: "stream",
+      timeout: 15000,
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      },
     });
 
     res.setHeader(
@@ -82,7 +88,8 @@ app.get("/api/download/:id", async (req, res) => {
     response.data.pipe(res);
   } catch (e) {
     console.error("DOWNLOAD ERROR:", e.message);
-    res.status(500).json({ error: "Download failed" });
+    if (e.response) console.error("Status:", e.response.status);
+    res.status(500).json({ error: "Download failed", details: e.message });
   }
 });
 
