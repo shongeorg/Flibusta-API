@@ -19,8 +19,8 @@ bot.on("text", async (ctx) => {
       .slice(0, 8)
       .map((book) => [
         Markup.button.callback(
-          `${book.title} - ${book.author}`,
-          `dl_${book.id}_${encodeURIComponent(book.title.slice(0, 30))}`,
+          `${book.title.slice(0, 30)} - ${book.author.slice(0, 20)}`,
+          `dl_${book.id}`,
         ),
       ]);
 
@@ -30,16 +30,15 @@ bot.on("text", async (ctx) => {
   }
 });
 
-bot.action(/^dl_(\d+)_(.+)$/, async (ctx) => {
+bot.action(/^dl_(\d+)$/, async (ctx) => {
   const bookId = ctx.match[1];
-  const bookTitle = decodeURIComponent(ctx.match[2]);
 
   await ctx.answerCbQuery("Готую файл...");
 
   try {
     await ctx.replyWithDocument({
       url: `${API_URL}/api/download/${bookId}?format=epub`,
-      filename: `${bookTitle}.epub`,
+      filename: `book_${bookId}.epub`,
     });
   } catch (e) {
     ctx.reply(
