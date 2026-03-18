@@ -3,7 +3,7 @@ const { Telegraf, Markup } = require("telegraf");
 const axios = require("axios");
 
 const bot = new Telegraf(process.env.TOKEN);
-const API_URL = "https://flibusta-api.vercel.app";
+const API_URL = process.env.API_URL;
 
 bot.start((ctx) => ctx.reply("Напиши назву книги для пошуку:"));
 
@@ -26,6 +26,7 @@ bot.on("text", async (ctx) => {
 
     ctx.reply("Вибери книгу:", Markup.inlineKeyboard(buttons));
   } catch (e) {
+    console.error("SEARCH ERROR:", e.message);
     ctx.reply("Помилка пошуку");
   }
 });
@@ -41,6 +42,7 @@ bot.action(/^dl_(\d+)$/, async (ctx) => {
       filename: `book_${bookId}.epub`,
     });
   } catch (e) {
+    console.error("DOWNLOAD ERROR:", e.message);
     ctx.reply(
       "Не вдалося завантажити файл. Можливо, він завеликий для Telegram API.",
     );

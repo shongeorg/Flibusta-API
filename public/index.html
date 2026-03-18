@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flibusta - Пошук книг</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 min-h-screen">
+    <div id="app" class="container mx-auto px-4 py-8 max-w-4xl">
+      <h1 class="text-3xl font-bold text-center mb-8 text-blue-600">
+        📚 Flibusta
+      </h1>
+
+      <!-- Пошук -->
+      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="flex gap-4 mb-4">
+          <button
+            @click="searchType = 'book'"
+            :class="searchType === 'book' ? 'bg-blue-600 text-white' : 'bg-gray-200'"
+            class="px-4 py-2 rounded-lg transition"
+          >
+            Книга
+          </button>
+          <button
+            @click="searchType = 'author'"
+            :class="searchType === 'author' ? 'bg-blue-600 text-white' : 'bg-gray-200'"
+            class="px-4 py-2 rounded-lg transition"
+          >
+            Автор
+          </button>
+          <a href="/api" class="px-4 py-2 rounded-lg transition"> API </a>
+        </div>
+
+        <div class="flex gap-2">
+          <input
+            v-model="query"
+            @keyup.enter="search"
+            type="text"
+            :placeholder="searchType === 'book' ? 'Назва книги...' : 'Імʼя автора...'"
+            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            @click="search"
+            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          >
+            Пошук
+          </button>
+        </div>
+      </div>
+
+      <!-- Завантаження -->
+      <div
+        v-if="downloading"
+        class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg mb-4 text-center"
+      >
+        Завантаження...
+      </div>
+
+      <!-- Результати -->
+      <div v-if="results.length > 0" class="space-y-3">
+        <div
+          v-for="book in results"
+          :key="book.id"
+          class="bg-white rounded-lg shadow-md p-4 flex justify-between items-center hover:shadow-lg transition"
+        >
+          <div>
+            <h3 class="font-semibold text-lg">{{ book.title }}</h3>
+            <p class="text-gray-600">{{ book.author }}</p>
+          </div>
+          <a
+            :href="`/api/download/${book.id}?format=epub`"
+            @click="startDownload"
+            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+          >
+            📥 EPUB
+          </a>
+        </div>
+      </div>
+
+      <!-- Немає результатів -->
+      <div
+        v-if="searched && results.length === 0"
+        class="text-center text-gray-500 py-8"
+      >
+        Нічого не знайдено 😔
+      </div>
+    </div>
+
+    <script>
+      const { createApp } = Vue;
+
+      createApp({
+        data() {
+          return {
+            query: "риддик",
+            searchType: "book",
+            results: [],
+            searched: false,
+            downloading: false,
+          };
+        },
+        methods: {
+          async search() {
+            if (!this.query.trim()) return;
+
+            this.searched = true;
+            this.results = [];
+
+            try {
+              const endpoint =
+                this.searchType === "book" ? "/api/book" : "/api/author";
+              const response = await fetch(
+                `${endpoint}?name=${encodeURIComponent(this.query)}`,
+              );
+              this.results = await response.json();
+            } catch (e) {
+              console.error("Search error:", e);
+            }
+          },
+          startDownload() {
+            this.downloading = true;
+            setTimeout(() => {
+              this.downloading = false;
+            }, 2000);
+          },
+        },
+      }).mount("#app");
+    </script>
+  </body>
+</html>

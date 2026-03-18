@@ -1,11 +1,14 @@
 const express = require("express");
 const flibusta = require("flibusta-api");
 const axios = require("axios");
+const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 4444;
 
-app.get("/", (req, res) => {
+app.use(express.static(path.join(__dirname, "public")));
+
+app.get("/api", (req, res) => {
   res.json({
     name: "Flibusta API",
     version: "1.0.0",
@@ -53,6 +56,34 @@ app.get("/api/search", async (req, res) => {
   } catch (e) {
     console.error("SEARCH ERROR:", e.message);
     res.status(500).json({ error: "Search failed", details: e.message });
+  }
+});
+
+app.get("/api/book", async (req, res) => {
+  try {
+    const { name: query } = req.query;
+    if (!query)
+      return res.status(400).json({ error: "Query name is required" });
+
+    const books = await flibusta.searchBooks(query);
+    res.json(books || []);
+  } catch (e) {
+    console.error("BOOK SEARCH ERROR:", e.message);
+    res.status(500).json({ error: "Book search failed", details: e.message });
+  }
+});
+
+app.get("/api/author", async (req, res) => {
+  try {
+    const { name: query } = req.query;
+    if (!query)
+      return res.status(400).json({ error: "Author name is required" });
+
+    const books = await flibusta.searchByAuthor(query);
+    res.json(books || []);
+  } catch (e) {
+    console.error("AUTHOR SEARCH ERROR:", e.message);
+    res.status(500).json({ error: "Author search failed", details: e.message });
   }
 });
 
