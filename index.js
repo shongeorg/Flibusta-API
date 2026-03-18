@@ -61,31 +61,33 @@ app.get("/api/download/:id", async (req, res) => {
     const { id: bookId } = req.params;
     const format = req.query.format || "epub";
 
-    const bookInfo = await flibusta.getBookInfo(bookId);
-    const title = bookInfo?.title || `book_${bookId}`;
-    const safeTitle = title.replace(/[<>:"/\\|?*]/g, "_").slice(0, 100);
-
     const downloadUrl = flibusta.getUrl(bookId, format);
     console.log(`Downloading: ${downloadUrl}`);
 
     const response = await axios({
       method: "get",
       url: downloadUrl,
-      responseType: "stream",
-      timeout: 15000,
+      responseType: "arraybuffer",
+      timeout: 30000,
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       },
+      maxRedirects: 5,
     });
+
+    console.log(
+      `Status: ${response.status}, Size: ${response.data.length} bytes`,
+    );
 
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename="${safeTitle}.${format}"`,
+      `attachment; filename="book_${bookId}.${format}"`,
     );
     res.setHeader("Content-Type", "application/octet-stream");
+    res.setHeader("Content-Length", response.data.length);
 
-    response.data.pipe(res);
+    res.send(response.data);
   } catch (e) {
     console.error("DOWNLOAD ERROR:", e.message);
     if (e.response) console.error("Status:", e.response.status);
