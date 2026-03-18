@@ -7,7 +7,7 @@
 ## Швидкий старт
 
 ```bash
-npm install
+npm  install
 npm run dev
 ```
 
