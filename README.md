@@ -2,6 +2,8 @@
 
 Простий REST API для пошуку та завантаження книг з Flibusta.
 
+**Production:** https://flibusta-api.vercel.app
+
 ## Швидкий старт
 
 ```bash
@@ -30,14 +32,17 @@ GET /api/search?name={query}
 ```
 
 **Параметри:**
+
 - `name` (required) — назва книги або автор
 
 **Приклад:**
+
 ```bash
 curl "http://localhost:4444/api/search?name=lovecraft"
 ```
 
 **Відповідь:**
+
 ```json
 [
   {
@@ -57,10 +62,12 @@ GET /api/download/:id?format={format}
 ```
 
 **Параметри:**
+
 - `id` (required) — ID книги з результатів пошуку
 - `format` (optional) — формат: `epub`, `fb2`, `txt` (за замовчуванням `epub`)
 
 **Приклад:**
+
 ```bash
 curl -O "http://localhost:4444/api/download/2085?format=epub"
 ```
